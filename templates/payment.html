@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+    <link rel="stylesheet" href="{% static 'css/payment.css' %}">
+</head>
+<body>
+    <div class="payment-container">
+        <header>
+            <h1>Payment Portal</h1>
+        </header>
+
+        <form action="/process-payment" method="POST">
+            <label for="policy">Select Policy:</label>
+            <select id="policy" name="policy" required>
+                <option value="">-- Select Policy --</option>
+                <option value="1">Policy A</option>
+                <option value="2">Policy B</option>
+                <option value="3">Policy C</option>
+            </select>
+
+            <label for="policyHolder">Policy Holder Name:</label>
+            <input type="text" id="policyHolder" name="policyHolder" required>
+
+            <label for="amount">Amount (₦):</label>
+            <input type="number" id="amount" name="amount" step="0.01" required>
+
+            <input type="hidden" id="transactionReference" name="transactionReference" value="{{ transaction_reference }}">
+
+            <label for="paymentMethod">Payment Method:</label>
+            <select id="paymentMethod" name="paymentMethod" required>
+                <option value="bank">Bank Transfer</option>
+                <option value="card">Credit/Debit Card</option>
+                <option value="mobile">Mobile Payment</option>
+            </select>
+
+            <button type="submit" class="btn-submit">Submit Payment</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Generate unique transaction reference
+            const transactionRefInput = document.getElementById("transactionReference");
+            const transactionRef = "TXN-" + Date.now(); // Example format: TXN-1697452980000
+            transactionRefInput.value = transactionRef;
+        
+            // Auto-fill amount based on selected policy
+            const policySelect = document.getElementById("policy");
+            const amountInput = document.getElementById("amount");
+        
+            const policyPrices = {
+                "1": 10000,   // Policy A = ₦10,000
+                "2": 15000,   // Policy B = ₦15,000
+                "3": 20000    // Policy C = ₦20,000
+            };
+        
+            policySelect.addEventListener("change", function () {
+                const selectedPolicy = policySelect.value;
+                amountInput.value = policyPrices[selectedPolicy] || ""; // Auto-fill or clear amount
+            });
+        });        
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Insurance - Payments</title>
+{% endblock %}
+
+{% block Css %}
+<link rel="stylesheet" href="{% static 'css/policy-management.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="policy-container">
+    <header>
+        <h1>Payment Management</h1>
+        <input type="text" id="searchBar" placeholder="Search Policies...">
+        <a href="/payment/"><button class="btn-add">Add New Payment</button></a>
+    </header>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Payment ID</th>
+                <th>User</th>
+                <th>Policy</th>
+                <th>Amount</th>
+                <th>Payment Date</th>
+                <th>Transaction Refernece</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>001</td>
+                <td>USER 002</td>
+                <td>Comprehensive</td>
+                <td>₦50,000</td>
+                <td>3/25/2025</td>
+                <td>FSFSDKFSDFIEUFHEIFH</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

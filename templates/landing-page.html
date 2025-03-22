@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Insurance Management System</title>
+    <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Car Insurance Management System</h1>
+            <nav>
+                <a href="#about">About Us</a>
+                <a href="#features">Features</a>
+                <a href="#plans">Plans</a>
+                <a href="#contact">Contact</a>
+                <a href="/login" class="btn">Login</a>
+                <a href="/register" class="btn">Register</a>
+            </nav>
+        </div>
+    </header>
+
+    <section id="hero">
+        <div class="container">
+            <h2>Reliable Car Insurance Solutions</h2>
+            <p>Get the best coverage at affordable rates. Secure your vehicle and drive with peace of mind.</p>
+            <a href="/register" class="cta">Get Started</a>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="container">
+            <h2>About Us</h2>
+            <p>We are dedicated to providing top-notch insurance services tailored to meet your needs. With our seamless online platform, managing your car insurance has never been easier.</p>
+        </div>
+    </section>
+
+    <section id="features">
+        <div class="container">
+            <h2>Why Choose Us?</h2>
+            <ul>
+                <li>✔️ Affordable Premiums</li>
+                <li>✔️ Easy Claim Process</li>
+                <li>✔️ Fast Policy Issuance</li>
+                <li>✔️ 24/7 Customer Support</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="plans">
+        <div class="container">
+            <h2>Our Plans</h2>
+            <div class="plan">
+                <h3>Third Party</h3>
+                <p>Coverage for damages caused to other vehicles and property.</p>
+            </div>
+            <div class="plan">
+                <h3>Comprehensive</h3>
+                <p>Full coverage for your vehicle and third-party liabilities.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="container">
+            <h2>Contact Us</h2>
+            <p>Email: support@carinsurance.com</p>
+            <p>Phone: +234 800 123 4567</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Car Insurance Management System. All Rights Reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

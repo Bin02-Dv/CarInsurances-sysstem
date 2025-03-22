@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Insurance - Policy Management</title>
+{% endblock %}
+
+{% block Css %}
+<link rel="stylesheet" href="{% static 'css/policy-management.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="policy-container">
+    <header>
+        <h1>Policy Management</h1>
+        <input type="text" id="searchBar" placeholder="Search Policies...">
+        <a href="/add-policy/"><button class="btn-add">Add New Policy</button></a>
+    </header>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Policy ID</th>
+                <th>Policy Name</th>
+                <th>Policy Type</th>
+                <th>Premium Amount</th>
+                <th>Duration</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if polices %}
+            {% for policy in polices %}
+            <tr>
+                <td>{{policy.id}}</td>
+                <td>{{policy.policy_name}}</td>
+                <td>{{policy.policy_type}}</td>
+                <td>{{policy.premium_amount}}</td>
+                <td>{{policy.duration_months}} Months</td>
+                <td>
+                    {% comment %} <a href="#"><button class="btn-edit">Edit</button></a> {% endcomment %}
+                    <a href="#"><button class="btn-delete">Delete</button></a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td>###</td>
+                <td>No data</td>
+                <td>No data</td>
+                <td>No data</td>
+                <td>
+                    {% comment %} <button class="btn-edit" style="opacity: .2;" disable>Edit</button> {% endcomment %}
+                    <button class="btn-delete" style="opacity: .2;">Delete</button>
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block title %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/dash.css' %}">
+    <link rel="stylesheet" href="{% static 'fontawesome-free/css/all.min.css' %}">
+    {% block Css %}{% endblock %}
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>Insurance System</h2>
+            <nav>
+                <a href="#" class="active">Dashboard</a>
+                <a href="/policy-management/">Policy Management</a>
+                <a href="/vehicle/">Vehicle Management</a>
+                <a href="/claims/">Claims</a>
+                <a href="/view-payments/">Payments</a>
+                <a href="/logout/">Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1>Welcome, {{user.first_name}}!</h1>
+                <div class="user-info">
+                    <i class="fa fa-user-circle" style="font-size: 30px;"></i>
+                </div>
+            </header>
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

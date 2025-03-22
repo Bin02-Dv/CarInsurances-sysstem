@@ -1,0 +1,83 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Car Insurance Management System</title>
+    <link rel="stylesheet" href="{% static 'css/log-regis.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error-success.css' %}">
+</head>
+<body>
+    <div class="registration-container">
+        <h2>Login to your Account</h2>
+        <br><br><br>
+        <!-- ====== Error ====== -->
+        <div class="logs-error-handle" id="HandlelogsError">
+            <span class="alert-danger">Invalid Credentials</span>
+            <div onclick=handleErrorCancel()>&times;</div>
+        </div>
+        <!-- ====== success ====== -->
+        <div class="logs-success-handle" id="HandleLogSuccess">
+            <span class="alert-success">Login Successful!</span>
+            <div onclick=handleSuccessCancel()>&times;</div>
+        </div>
+        <form method="POST" id="login">
+            {% csrf_token %}
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit" class="btn-register">Login</button>
+            <p>Don't have an account? <a href="/register">Register here</a></p>
+        </form>
+    </div>
+
+
+    <script src="{% static 'js/JQ.js' %}"></script>
+
+
+    <script>
+        // ajax
+        $(document).on('submit', '#login', function (e){
+            e.preventDefault();
+            var green = $(".alert-success");
+            var red = $(".alert-danger");
+
+            var errorCon = $('.logs-error-handle');
+            var successCon = $('.logs-success-handle');
+
+            var formData = new FormData(this);
+            //var loader = document.querySelector(".loader");
+
+            //loader.classList.remove("loader-hidden");
+            $.ajax({
+                type: 'POST',
+                url: '/login/',
+                data: formData,
+                processData: false, // Ensure data is not processed for FormData
+                contentType: false, // Ensure proper content type for FormData
+                success: function (response){
+                    var success = response['success'];
+                    if(success){
+                        // NORMAL ALERT warning, error, success
+                        errorCon.removeClass("block");
+                        green.html('');
+                        successCon.addClass("block");
+                        green.append(response['message']);
+                        //loader.classList.add("loader-hidden");
+                        window.location.href = '/dash/';
+                    }else{
+                        successCon.removeClass("block");
+                        red.html('');
+                        errorCon.addClass("block");
+                        red.append(response['message']);
+                        //loader.classList.add("loader-hidden");
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

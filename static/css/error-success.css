@@ -1,0 +1,42 @@
+.logs-error-handle {
+    width: 100%;
+    background-color: rgba(255, 0, 0, 0.163);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: red;
+    padding: 10px;
+    border: 1px dotted red;
+    transform: translateY(-100%);
+    animation: slideDown 1s ease forwards;
+    display: none;
+}
+.logs-error-handle div {
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+.logs-success-handle {
+    width: 100%;
+    background-color: rgba(0, 255, 0, 0.288);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: green;
+    padding: 10px;
+    border: 1px dotted green;
+    transform: translateY(-100%);
+    animation: slideDown 1s ease forwards;
+    display: none;
+}
+.logs-success-handle div {
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.logs-error-handle.block {
+    display: block;
+}
+
+.logs-success-handle.block {
+    display: block;
+}

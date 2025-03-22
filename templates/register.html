@@ -1,0 +1,91 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration - Car Insurance Management System</title>
+    <link rel="stylesheet" href="{% static 'css/log-regis.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error-success.css' %}">
+</head>
+<body>
+    <div class="registration-container">
+        <h2>Create an Account</h2>
+        <br><br><br>
+        <!-- ====== Error ====== -->
+        <div class="logs-error-handle" id="HandlelogsError">
+            <span class="alert-danger">Invalid Credentials</span>
+            <div onclick=handleErrorCancel()>&times;</div>
+        </div>
+        <!-- ====== success ====== -->
+        <div class="logs-success-handle" id="HandleLogSuccess">
+            <span class="alert-success">Login Successful!</span>
+            <div onclick=handleSuccessCancel()>&times;</div>
+        </div>
+        <form method="POST" id="register">
+            {% csrf_token %}
+            <label for="full_name">Full Name</label>
+            <input type="text" id="full_name" name="full_name" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+
+            <button type="submit" class="btn-register">Register</button>
+            <p>Already have an account? <a href="/login">Login here</a></p>
+        </form>
+    </div>
+
+    <script src="{% static 'js/JQ.js' %}"></script>
+
+
+    <script>
+        // ajax
+        $(document).on('submit', '#register', function (e){
+            e.preventDefault();
+            var green = $(".alert-success");
+            var red = $(".alert-danger");
+
+            var errorCon = $('.logs-error-handle');
+            var successCon = $('.logs-success-handle');
+
+            var formData = new FormData(this);
+            //var loader = document.querySelector(".loader");
+
+            //loader.classList.remove("loader-hidden");
+            $.ajax({
+                type: 'POST',
+                url: '/register/',
+                data: formData,
+                processData: false, // Ensure data is not processed for FormData
+                contentType: false, // Ensure proper content type for FormData
+                success: function (response){
+                    var success = response['success'];
+                    if(success){
+                        // NORMAL ALERT warning, error, success
+                        errorCon.removeClass("block");
+                        green.html('');
+                        successCon.addClass("block");
+                        green.append(response['message']);
+                        //loader.classList.add("loader-hidden");
+                        window.location.href = '/login/';
+                    }else{
+                        successCon.removeClass("block");
+                        red.html('');
+                        errorCon.addClass("block");
+                        red.append(response['message']);
+                        //loader.classList.add("loader-hidden");
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

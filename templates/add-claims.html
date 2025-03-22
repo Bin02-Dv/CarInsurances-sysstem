@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Insurance Claim</title>
+    <link rel="stylesheet" href="{% static 'css/add-claims.css' %}">
+</head>
+<body>
+    <div class="claim-container">
+        <header>
+            <h1>Submit a New Claim</h1>
+        </header>
+
+        <form class="claim-form" method="POST" action="/add-claim/">
+            {% csrf_token %}
+
+            <label for="policy">Policy:</label>
+            <select id="policy" name="policy" required>
+                <option value="">Select Policy</option>
+                {% if policy %}
+                {% for p in policy %}
+                <option value="{{p.policy_name}}">{{p.policy_name}}</option>
+                {% endfor %}
+                {% else %}
+                <option value="">No policy yet!</option>
+                {% endif %}
+            </select>
+
+            <label for="claim_amount">Claim Amount (₦):</label>
+            <input type="number" id="claim_amount" name="claim_amount" required>
+
+            <label for="incident_date">Incident Date:</label>
+            <input type="date" id="incident_date" name="incident_date" required>
+
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4" required></textarea>
+
+            <label for="supporting_docs">Supporting Documents:</label>
+            <input type="file" id="supporting_docs" name="supporting_docs">
+
+            <button type="submit" class="btn-submit">Submit Claim</button>
+        </form>
+    </div>
+</body>
+</html>
