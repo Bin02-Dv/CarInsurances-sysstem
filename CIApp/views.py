@@ -3,7 +3,8 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from .models import InsurancePolicy, Payment, Claim, Vehicle
 from django.contrib import auth
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.exceptions import ObjectDoesNotExist
 
 # Create your views here.
 
@@ -59,9 +60,13 @@ def login(request):
 @login_required(login_url='/login')
 def dash(request):
     current_user = request.user
+    policy = InsurancePolicy.objects.all().count()
+    pending_claims = Claim.objects.filter(status='pending').count()
     
     context = {
-        "user": current_user
+        "user": current_user,
+        "policy": policy,
+        "pending_claims": pending_claims
     }
     return render(request, 'dash.html', context)
 
@@ -96,10 +101,12 @@ def policy_management(request):
 def claims(request):
     current_user = request.user
     claims = Claim.objects.filter(user=current_user)
+    a_claims = Claim.objects.all()
     
     context = {
         "user": current_user,
-        "claims": claims
+        "claims": claims,
+        "a_claims": a_claims
     }
     return render(request, 'claims.html', context)
 
@@ -149,11 +156,37 @@ def add_claims(request):
 
 @login_required(login_url='/login')
 def payment(request):
+    current_user = request.user
+    
+    if request.method == 'POST':
+        policy_id = request.POST.get("policy")
+        amount = request.POST.get("amount")
+        transactionReference = request.POST.get("transactionReference")
+        
+        policy = InsurancePolicy.objects.get(id=policy_id)
+
+        Payment.objects.create(
+            user=current_user,
+            policy=policy,
+            amount=amount,
+            transaction_reference=transactionReference
+        )
+        return JsonResponse({"success": True, "message": "Payment Submitted Successfully..."})
+    
     return render(request, 'payment.html')
 
 @login_required(login_url='/login')
 def view_payments(request):
-    return render(request, 'view-payments.html')
+    current_user = request.user
+    user_payments = Payment.objects.filter(user=current_user)
+    all_payments = Payment.objects.all()
+    
+    context = {
+        "user": current_user,
+        "user_payments": user_payments,
+        "all_payments": all_payments
+    }
+    return render(request, 'view-payments.html', context)
 
 @login_required(login_url='/login')
 def vehicle(request):
@@ -202,3 +235,81 @@ def vehicle(request):
         "user_vehicles": user_vehicles
     }
     return render(request, 'vehicles.html', context)
+
+
+# Admin check function
+def is_admin(user):
+    return user.is_staff or user.is_superuser
+
+# Approved
+
+@user_passes_test(is_admin)
+def approved(request, id):
+    try:
+        claim = Claim.objects.get(id=id)
+        
+        if claim.status == 'approved' or claim.status == 'Approved':
+            return JsonResponse({"success": False, "message": "Claim is already approved."})
+
+        claim.status = 'Approved'
+        claim.save()
+        
+        return JsonResponse({"success": True, "message": "Claim approved successfully."})
+
+    except Claim.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Claim not found!"})
+
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Error: {str(e)}"})
+
+@user_passes_test(is_admin)
+def rejected(request, id):
+    try:
+        claim = Claim.objects.get(id=id)
+        
+        if claim.status == 'rejected' or claim.status == 'Rejected':
+            return JsonResponse({"success": False, "message": "Claim is already rejected."})
+
+        claim.status = 'Rejected'
+        claim.save()
+        
+        return JsonResponse({"success": True, "message": "Claim has been rejected successfully."})
+
+    except Claim.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Claim not found!"})
+
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Error: {str(e)}"})
+
+@user_passes_test(is_admin)
+def delete_claim(request, id):
+    try:
+        claim = Claim.objects.get(id=id)
+        claim.delete()
+        
+        return JsonResponse({"success": True, "message": "Claim has been deleted successfully."})
+
+    except Claim.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Claim not found!"})
+
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Error: {str(e)}"})
+    
+@user_passes_test(is_admin)
+def delete_policy(request, id):
+    try:
+        policy = InsurancePolicy.objects.get(id=id)
+        policy.delete()
+        
+        return JsonResponse({"success": True, "message": "policy has been deleted successfully."})
+
+    except InsurancePolicy.DoesNotExist:
+        return JsonResponse({"success": False, "message": "policy not found!"})
+
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Error: {str(e)}"})
+    
+
+def get_policy_details(request):
+    policies = InsurancePolicy.objects.values('id', 'policy_name', 'premium_amount', 'policy_type')
+    return JsonResponse(list(policies), safe=False)

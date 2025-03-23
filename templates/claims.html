@@ -28,26 +28,27 @@
                 <th>Incident Date</th>
                 <th>Supporting Document</th>
                 <th>Status</th>
-                {% if current_user.is_superuser %}
+                {% if user.is_superuser %}
                 <th>Actions</th>
                 {% endif %}
             </tr>
         </thead>
+        {% if user.is_superuser %}
         <tbody>
-            {% if claims %}
-            {% for claim in claims %}
-            <tr>
+            {% if a_claims %}
+            {% for claim in a_claims %}
+            <tr id="claim-row-{{claim.id}}">
                 <td>CLM-{{claim.id}}</td>
                 <td>{{claim.user.first_name}}</td>
                 <td>{{claim.claim_amount}}</td>
                 <td>{{claim.incident_date}}</td>
                 <td><a href="{{claim.supporting_documents.url}}">{{claim.supporting_documents.url}}</a></td>
-                <td>{{claim.status}}</td>
-                {% if current_user.is_superuser %}
+                <td class="claim-status">{{claim.status}}</td>
+                {% if user.is_superuser %}
                 <td>
-                    <a href=""><button class="btn-approve">Approve</button></a>
-                    <a href=""><button class="btn-reject">Reject</button></a>
-                    <a href=""><button class="btn-delete">Delete</button></a>
+                    <button class="btn-approve" data-id="{{claim.id}}">Approve</button>
+                    <button class="btn-reject" data-id="{{claim.id}}">Reject</button>
+                    <button class="btn-delete" data-id="{{claim.id}}">Delete</button>
                 </td>
                 {% endif %}
             </tr>
@@ -60,7 +61,7 @@
                 <td>No data</td>
                 <td>No data</td>
                 <td>No data</td>
-                {% if current_user.is_superuser %}
+                {% if user.is_superuser %}
                 <td>
                     <button style="opacity: .3;" class="btn-approve" disabled>Approve</button>
                     <button style="opacity: .3;" class="btn-reject" disabled>Reject</button>
@@ -70,6 +71,110 @@
             </tr>
             {% endif %}
         </tbody>
+        {% else %}
+        <tbody>
+            {% if claims %}
+            {% for claim in claims %}
+            <tr id="claim-row-{{claim.id}}">
+                <td>CLM-{{claim.id}}</td>
+                <td>{{claim.user.first_name}}</td>
+                <td>{{claim.claim_amount}}</td>
+                <td>{{claim.incident_date}}</td>
+                <td><a href="{{claim.supporting_documents.url}}">{{claim.supporting_documents.url}}</a></td>
+                <td class="claim-status">{{claim.status}}</td>
+                {% if user.is_superuser %}
+                <td>
+                    <button class="btn-approve" data-id="{{claim.id}}">Approve</button>
+                    <button class="btn-reject" data-id="{{claim.id}}">Reject</button>
+                    <button class="btn-delete" data-id="{{claim.id}}">Delete</button>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td>###</td>
+                <td>No data</td>
+                <td>No data</td>
+                <td>No data</td>
+                <td>No data</td>
+                <td>No data</td>
+                {% if user.is_superuser %}
+                <td>
+                    <button style="opacity: .3;" class="btn-approve" disabled>Approve</button>
+                    <button style="opacity: .3;" class="btn-reject" disabled>Reject</button>
+                    <button style="opacity: .3;" class="btn-delete">Delete</button>
+                </td>
+                {% endif %}
+            </tr>
+            {% endif %}
+        </tbody>
+        {% endif %}
     </table>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Approve Claim
+        $(".btn-approve").on("click", function (e) {
+            e.preventDefault();
+            const claimId = $(this).data("id");
+
+            $.ajax({
+                url: `/approved/${claimId}/`,
+                method: "GET",
+                success: function (response) {
+                    if (response.success) {
+                        $(`#claim-row-${claimId} .claim-status`).text("Approved");
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        });
+
+        // Reject Claim
+        $(".btn-reject").on("click", function (e) {
+            e.preventDefault();
+            const claimId = $(this).data("id");
+
+            $.ajax({
+                url: `/rejected/${claimId}/`,
+                method: "GET",
+                success: function (response) {
+                    if (response.success) {
+                        $(`#claim-row-${claimId} .claim-status`).text("Rejected");
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        });
+
+        // Delete Claim
+        $(".btn-delete").on("click", function (e) {
+            e.preventDefault();
+            const claimId = $(this).data("id");
+
+            if (confirm("Are you sure you want to delete this claim?")) {
+                $.ajax({
+                    url: `/delete-claim/${claimId}/`,
+                    method: "DELETE",
+                    headers: { "X-CSRFToken": "{{ csrf_token }}" },
+                    success: function (response) {
+                        if (response.success) {
+                            $(`#claim-row-${claimId}`).fadeOut();
+                            alert(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    }
+                });
+            }
+        });
+    });
+</script>
 {% endblock %}

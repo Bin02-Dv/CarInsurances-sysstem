@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Page</title>
     <link rel="stylesheet" href="{% static 'css/payment.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error-success.css' %}">
 </head>
 <body>
     <div class="payment-container">
@@ -13,29 +14,36 @@
             <h1>Payment Portal</h1>
         </header>
 
-        <form action="/process-payment" method="POST">
+        <br><br><br>
+        <!-- ====== Error ====== -->
+        <div class="logs-error-handle" id="HandlelogsError">
+            <span class="alert-danger">Invalid Credentials</span>
+            <div onclick=handleErrorCancel()>&times;</div>
+        </div>
+        <!-- ====== success ====== -->
+        <div class="logs-success-handle" id="HandleLogSuccess">
+            <span class="alert-success">Login Successful!</span>
+            <div onclick=handleSuccessCancel()>&times;</div>
+        </div>
+
+        <form id="payment" method="POST">
+            {% csrf_token %}
             <label for="policy">Select Policy:</label>
             <select id="policy" name="policy" required>
                 <option value="">-- Select Policy --</option>
-                <option value="1">Policy A</option>
-                <option value="2">Policy B</option>
-                <option value="3">Policy C</option>
             </select>
 
-            <label for="policyHolder">Policy Holder Name:</label>
-            <input type="text" id="policyHolder" name="policyHolder" required>
-
             <label for="amount">Amount (₦):</label>
-            <input type="number" id="amount" name="amount" step="0.01" required>
+            <input type="number" id="amount" name="amount" step="0.01" readonly>
 
             <input type="hidden" id="transactionReference" name="transactionReference" value="{{ transaction_reference }}">
 
-            <label for="paymentMethod">Payment Method:</label>
+            {% comment %} <label for="paymentMethod">Payment Method:</label>
             <select id="paymentMethod" name="paymentMethod" required>
                 <option value="bank">Bank Transfer</option>
                 <option value="card">Credit/Debit Card</option>
                 <option value="mobile">Mobile Payment</option>
-            </select>
+            </select> {% endcomment %}
 
             <button type="submit" class="btn-submit">Submit Payment</button>
         </form>
@@ -45,24 +53,82 @@
         document.addEventListener("DOMContentLoaded", function () {
             // Generate unique transaction reference
             const transactionRefInput = document.getElementById("transactionReference");
-            const transactionRef = "TXN-" + Date.now(); // Example format: TXN-1697452980000
+            const transactionRef = "TXN-" + Date.now();
             transactionRefInput.value = transactionRef;
         
             // Auto-fill amount based on selected policy
             const policySelect = document.getElementById("policy");
             const amountInput = document.getElementById("amount");
         
-            const policyPrices = {
-                "1": 10000,   // Policy A = ₦10,000
-                "2": 15000,   // Policy B = ₦15,000
-                "3": 20000    // Policy C = ₦20,000
-            };
+            // Fetch policies dynamically from the backend
+            fetch("/api/policies/")
+                .then(response => response.json())
+                .then(policies => {
+                    policies.forEach(policy => {
+                        const option = document.createElement("option");
+                        option.value = policy.id;
+                        option.textContent = policy.policy_name +' - '+ policy.policy_type;
+                        policySelect.appendChild(option);
+                    });
         
-            policySelect.addEventListener("change", function () {
-                const selectedPolicy = policySelect.value;
-                amountInput.value = policyPrices[selectedPolicy] || ""; // Auto-fill or clear amount
+                    policySelect.addEventListener("change", function () {
+                        const selectedPolicyId = policySelect.value;
+                        const selectedPolicy = policies.find(policy => policy.id == selectedPolicyId);
+        
+                        if (selectedPolicy) {
+                            amountInput.value = selectedPolicy.premium_amount;
+                        } else {
+                            amountInput.value = "";  // Clear if no policy selected
+                        }
+                    });
+                })
+                .catch(error => console.error("Error fetching policies:", error));
             });
-        });        
+    </script>
+
+    <script src="{% static 'js/JQ.js' %}"></script>
+
+
+    <script>
+        // ajax
+        $(document).on('submit', '#payment', function (e){
+            e.preventDefault();
+            var green = $(".alert-success");
+            var red = $(".alert-danger");
+
+            var errorCon = $('.logs-error-handle');
+            var successCon = $('.logs-success-handle');
+
+            var formData = new FormData(this);
+            //var loader = document.querySelector(".loader");
+
+            //loader.classList.remove("loader-hidden");
+            $.ajax({
+                type: 'POST',
+                url: '/payment/',
+                data: formData,
+                processData: false, // Ensure data is not processed for FormData
+                contentType: false, // Ensure proper content type for FormData
+                success: function (response){
+                    var success = response['success'];
+                    if(success){
+                        // NORMAL ALERT warning, error, success
+                        errorCon.removeClass("block");
+                        green.html('');
+                        successCon.addClass("block");
+                        green.append(response['message']);
+                        //loader.classList.add("loader-hidden");
+                        window.location.href = '/view-payments/';
+                    }else{
+                        successCon.removeClass("block");
+                        red.html('');
+                        errorCon.addClass("block");
+                        red.append(response['message']);
+                        //loader.classList.add("loader-hidden");
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>

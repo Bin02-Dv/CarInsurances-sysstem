@@ -15,7 +15,9 @@
             <h2>Insurance System</h2>
             <nav>
                 <a href="/dash/" class="active">Dashboard</a>
+                {% if user.is_superuser %}
                 <a href="/policy-management/">Policy Management</a>
+                {% endif %}
                 <a href="/vehicle/">Vehicle Management</a>
                 <a href="/claims/">Claims</a>
                 <a href="/view-payments/">Payments</a>
@@ -25,7 +27,11 @@
 
         <main class="main-content">
             <header class="dashboard-header">
+                {% if not user.is_superuser %}
                 <h1>Welcome, {{user.first_name}}!</h1>
+                {% else %}
+                <h1>Welcome, {{user.email}}!</h1>
+                {% endif %}
                 <div class="user-info">
                     <i class="fa fa-user-circle" style="font-size: 30px;"></i>
                 </div>
