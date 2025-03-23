@@ -15,7 +15,7 @@
 <div class="claims-container">
     <header>
         <h1>Claims Management</h1>
-        <input type="text" id="searchBar" placeholder="Search Claims...">
+        {% comment %} <input type="text" id="searchBar" placeholder="Search Claims..."> {% endcomment %}
         <a href="/add-claims/"><button class="btn-add">Add New Claim</button></a>
     </header>
 
@@ -25,33 +25,50 @@
                 <th>Claim ID</th>
                 <th>Policy Holder</th>
                 <th>Claim Amount</th>
+                <th>Incident Date</th>
+                <th>Supporting Document</th>
                 <th>Status</th>
+                {% if current_user.is_superuser %}
                 <th>Actions</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
+            {% if claims %}
+            {% for claim in claims %}
             <tr>
-                <td>1001</td>
-                <td>John Doe</td>
-                <td>₦150,000</td>
-                <td>Pending</td>
+                <td>CLM-{{claim.id}}</td>
+                <td>{{claim.user.first_name}}</td>
+                <td>{{claim.claim_amount}}</td>
+                <td>{{claim.incident_date}}</td>
+                <td><a href="{{claim.supporting_documents.url}}">{{claim.supporting_documents.url}}</a></td>
+                <td>{{claim.status}}</td>
+                {% if current_user.is_superuser %}
                 <td>
-                    <button class="btn-approve">Approve</button>
-                    <button class="btn-reject">Reject</button>
-                    <button class="btn-delete">Delete</button>
+                    <a href=""><button class="btn-approve">Approve</button></a>
+                    <a href=""><button class="btn-reject">Reject</button></a>
+                    <a href=""><button class="btn-delete">Delete</button></a>
                 </td>
+                {% endif %}
             </tr>
+            {% endfor %}
+            {% else %}
             <tr>
-                <td>1002</td>
-                <td>Jane Smith</td>
-                <td>₦75,000</td>
-                <td>Approved</td>
+                <td>###</td>
+                <td>No data</td>
+                <td>No data</td>
+                <td>No data</td>
+                <td>No data</td>
+                <td>No data</td>
+                {% if current_user.is_superuser %}
                 <td>
-                    <button class="btn-approve" disabled>Approve</button>
-                    <button class="btn-reject" disabled>Reject</button>
-                    <button class="btn-delete">Delete</button>
+                    <button style="opacity: .3;" class="btn-approve" disabled>Approve</button>
+                    <button style="opacity: .3;" class="btn-reject" disabled>Reject</button>
+                    <button style="opacity: .3;" class="btn-delete">Delete</button>
                 </td>
+                {% endif %}
             </tr>
+            {% endif %}
         </tbody>
     </table>
 </div>

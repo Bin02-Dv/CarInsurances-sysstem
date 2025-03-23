@@ -65,6 +65,7 @@ def dash(request):
     }
     return render(request, 'dash.html', context)
 
+@login_required(login_url='/login')
 def add_policy(request):
     if request.method == 'POST':
         policy_name = request.POST.get("policy_name")
@@ -80,6 +81,7 @@ def add_policy(request):
         return JsonResponse({"success": True, "message": "Insurance Policy Added Successfully..."})
     return render(request, 'add-policy.html')
 
+@login_required(login_url='/login')
 def policy_management(request):
     current_user = request.user
     polices =  InsurancePolicy.objects.all()
@@ -90,31 +92,70 @@ def policy_management(request):
     }
     return render(request, 'policy-management.html', context)
 
+@login_required(login_url='/login')
 def claims(request):
     current_user = request.user
+    claims = Claim.objects.filter(user=current_user)
     
     context = {
-        "user": current_user
+        "user": current_user,
+        "claims": claims
     }
     return render(request, 'claims.html', context)
 
+@login_required(login_url='/login')
 def add_claims(request):
+    user = request.user
     policy = InsurancePolicy.objects.all()
-    
+    vehicles = Vehicle.objects.filter(owner=user)
+
     if request.method == "POST":
-        pass
-    
+        try:
+            if not request.FILES.get('supporting_docs'):
+                return JsonResponse({"success": False, "message": "Supporting Documents are required!!"})
+            
+            policy_id = request.POST.get('policy')
+            vehicle_id = request.POST.get('vehicle')
+            incident_date = request.POST.get('incident_date')
+            claim_amount = request.POST.get('claim_amount')
+            supporting_docs = request.FILES.get('supporting_docs')
+            
+            selected_policy = InsurancePolicy.objects.get(id=policy_id)
+            selected_vehicle = Vehicle.objects.get(id=vehicle_id)
+
+            Claim.objects.create(
+                user=user,
+                policy=selected_policy,
+                vehicle=selected_vehicle,
+                incident_date=incident_date,
+                claim_amount=claim_amount, 
+                supporting_documents=supporting_docs
+            )
+            
+            return JsonResponse({"success": True, "message": "Claim Sent successfully..."})
+
+        except InsurancePolicy.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Selected policy not found!"})
+        except Vehicle.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Selected vehicle not found!"})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": f"Error: {str(e)}"})
+
     context = {
-        "policy": policy
+        "policy": policy,
+        "vehicles": vehicles,
     }
     return render(request, 'add-claims.html', context)
 
+@login_required(login_url='/login')
 def payment(request):
     return render(request, 'payment.html')
 
+@login_required(login_url='/login')
 def view_payments(request):
     return render(request, 'view-payments.html')
 
+@login_required(login_url='/login')
 def vehicle(request):
     current_user = request.user
     vehicles =  Vehicle.objects.all()
